@@ -1,0 +1,3288 @@
+非終結語詞在文法中無用
+
+    ID_or_LIT
+    shift_op
+    operation
+    Operand
+
+
+未在文法中使用終結語詞
+
+    RSHIFT
+
+
+規則在文法中無用
+
+  136 operation: Lit
+  137          | '(' operation ')'
+  138          | operation LOR operation
+  139          | '!' operation
+  140          | '-' operation
+  141          | operation '+' operation
+  142          | operation '-' operation
+  143          | operation '/' operation
+  144          | operation '%' operation
+  145          | operation '*' operation
+  146          | operation '>' operation
+  147          | operation '<' operation
+  148          | operation LAND operation
+
+  149 Operand: AsStmt
+
+
+規則由於衝突而在剖析器中無用
+
+   87 Expression: NEWLINE
+   88           | ε
+
+
+狀態 41 衝突：1 項偏移/縮減
+狀態 42 衝突：2 項偏移/縮減，1 項縮減/縮減
+狀態 62 衝突：2 項偏移/縮減，1 項縮減/縮減
+狀態 78 衝突：3 項偏移/縮減，2 項縮減/縮減
+狀態 79 衝突：3 項偏移/縮減，6 項縮減/縮減
+狀態 80 衝突：4 項偏移/縮減，3 項縮減/縮減
+狀態 81 衝突：2 項偏移/縮減
+狀態 85 衝突：3 項縮減/縮減
+狀態 87 衝突：1 項偏移/縮減，3 項縮減/縮減
+狀態 94 衝突：2 項偏移/縮減
+狀態 145 衝突：2 項偏移/縮減
+狀態 146 衝突：2 項偏移/縮減
+狀態 153 衝突：2 項偏移/縮減
+狀態 156 衝突：2 項偏移/縮減
+狀態 164 衝突：1 項偏移/縮減
+
+
+文法
+
+    0 $accept: Program $end
+
+    1 $@1: ε
+
+    2 Program: $@1 GlobalStatementList
+
+    3 GlobalStatementList: GlobalStatementList GlobalStatement
+    4                    | GlobalStatement
+
+    5 GlobalStatement: PackageStmt
+    6                | NEWLINE
+
+    7 PackageStmt: PrintLNStmt
+    8            | PrintStmt
+    9            | DecStmt
+   10            | Block
+   11            | AssignStmt
+   12            | IfStmt
+   13            | WhileStmt
+   14            | ForStmt
+   15            | BreakStmt
+   16            | FunctionDeclStmt
+   17            | ReturnStmt
+   18            | Callfunc
+
+   19 FunctionDeclStmt: Func
+
+   20 $@2: ε
+
+   21 Func: Funcname '(' $@2 Parameter ')' ARROW TypeName '{' GlobalStatementList '}'
+   22     | Funcname '(' ')' Block
+
+   23 Funcname: FUNC ID
+
+   24 Parameter: ID ':' TypeName
+   25          | Parameter ',' ID ':' TypeName
+
+   26 ReturnStmt: RETURN Lit ';'
+
+   27 $@3: ε
+
+   28 ReturnStmt: ID '%' ID EQL $@3 Lit
+
+   29 Callfunc: ID '(' ')' ';'
+   30         | ID '(' argument_expr_list ')'
+
+   31 argument_expr_list: argument_expr_list ',' ID
+   32                   | ID
+
+   33 DecStmt: LET ID ':' TypeName '=' Lit ';'
+   34        | LET MUT ID ':' TypeName '=' Lit ';'
+   35        | LET MUT ID '=' Lit ';'
+   36        | LET MUT ID ':' TypeName ';'
+   37        | LET ID ':' Lit ';'
+   38        | LET ID '=' Lit ';'
+
+   39 $@4: ε
+
+   40 DecStmt: LET ID ':' '[' TypeName ';' INT_LIT $@4 ']' '=' '[' Lit ']' ';'
+
+   41 AssignStmt: AssignmetExpr ';'
+
+   42 AssignmetExpr: ID assign_op Expression
+
+   43 assign_op: '='
+   44          | ADD_ASSIGN
+   45          | SUB_ASSIGN
+   46          | MUL_ASSIGN
+   47          | DIV_ASSIGN
+   48          | REM_ASSIGN
+
+   49 $@5: ε
+
+   50 Block: '{' $@5 GlobalStatementList '}'
+
+   51 IfStmt: IF Condition Block IfStmt
+   52       | IF Condition Block new_non ELSE Block
+   53       | IF Condition Block NEWLINE
+
+   54 $@6: ε
+
+   55 Condition: ID $@6 '>' Lit
+
+   56 $@7: ε
+
+   57 Condition: ID $@7 NEQ Lit
+
+   58 $@8: ε
+
+   59 Condition: ID $@8 EQL Lit
+
+   60 $@9: ε
+
+   61 Condition: ID $@9 '<' Lit
+   62          | Callfunc
+
+   63 WhileStmt: WHILE Condition Block
+
+   64 $@10: ε
+
+   65 ForStmt: FOR ID IN ID '{' $@10 GlobalStatementList '}'
+
+   66 Lit: INT_LIT
+   67    | FLOAT_LIT
+   68    | '"' '"'
+   69    | '"' STRING_LIT '"'
+   70    | TRUE
+   71    | FALSE
+   72    | Lit ',' Lit
+   73    | LoopStmt
+
+   74 $@11: ε
+
+   75 $@12: ε
+
+   76 Lit: '&' ID $@11 '[' Lit DOTDOT $@12 Lit ']'
+   77    | ε
+
+   78 LoopStmt: LOOP Block
+
+   79 BreakStmt: BREAK Lit ';'
+
+   80 PrintLNStmt: PRINTLN '(' Expression ')' ';'
+
+   81 PrintStmt: PRINT '(' new_non Expression new_non ')' ';'
+
+   82 new_non: ε
+   83        | NEWLINE
+
+   84 Expression: AsStmt
+   85           | Exp
+   86           | NEWLINE Expression
+   87           | NEWLINE
+   88           | ε
+   89           | Lit
+   90           | ID
+
+   91 $@13: ε
+
+   92 Expression: ID $@13 '[' Lit ']'
+   93           | ExpressionExpr
+
+   94 AsStmt: ID AS TypeName
+   95       | Lit AS TypeName
+   96       | '(' Exp ')'
+   97       | ID
+   98       | Lit
+
+   99 Exp: Exp LOR Exp1
+  100    | Exp1
+
+  101 Exp1: Exp1 LAND Exp2
+  102     | Exp2
+
+  103 Exp2: Exp2 com_op Exp3
+  104     | Exp3
+
+  105 Exp3: Exp3 add_op Exp4
+  106     | Exp4
+
+  107 Exp4: Exp4 mul_op AsStmt
+  108     | uexpr
+
+  109 uexpr: AsStmt
+  110      | unary_op uexpr
+
+  111 unary_op: '+'
+  112         | '-'
+  113         | '!'
+
+  114 com_op: '>'
+  115       | '<'
+  116       | GEQ
+  117       | LEQ
+  118       | EQL
+  119       | NEQ
+
+  120 add_op: '+'
+  121       | '-'
+
+  122 mul_op: '*'
+  123       | '/'
+  124       | '%'
+
+  125 ExpressionExpr: AsStmt '+' AsStmt
+  126               | ID '-' ID
+  127               | ID '*' ID
+  128               | ID '/' ID
+  129               | ID '%' ID
+  130               | ID LSHIFT ID
+
+  131 TypeName: INT
+  132         | FLOAT
+  133         | '&'
+  134         | '&' STR
+  135         | BOOL
+
+
+終結語詞，附有它們出現處的規則
+
+    $end (0) 0
+    '!' (33) 113
+    '"' (34) 68 69
+    '%' (37) 28 124 129
+    '&' (38) 76 133 134
+    '(' (40) 21 22 29 30 80 81 96
+    ')' (41) 21 22 29 30 80 81 96
+    '*' (42) 122 127
+    '+' (43) 111 120 125
+    ',' (44) 25 31 72
+    '-' (45) 112 121 126
+    '/' (47) 123 128
+    ':' (58) 24 25 33 34 36 37 40
+    ';' (59) 26 29 33 34 35 36 37 38 40 41 79 80 81
+    '<' (60) 61 115
+    '=' (61) 33 34 35 38 40 43
+    '>' (62) 55 114
+    '[' (91) 40 76 92
+    ']' (93) 40 76 92
+    '{' (123) 21 50 65
+    '}' (125) 21 50 65
+    error (256)
+    LET (258) 33 34 35 36 37 38 40
+    MUT (259) 34 35 36
+    NEWLINE (260) 6 53 83 86 87
+    INT (261) 131
+    FLOAT (262) 132
+    BOOL (263) 135
+    STR (264) 134
+    TRUE (265) 70
+    FALSE (266) 71
+    GEQ (267) 116
+    LEQ (268) 117
+    EQL (269) 28 59 118
+    NEQ (270) 57 119
+    LOR (271) 99
+    LAND (272) 101
+    ADD_ASSIGN (273) 44
+    SUB_ASSIGN (274) 45
+    MUL_ASSIGN (275) 46
+    DIV_ASSIGN (276) 47
+    REM_ASSIGN (277) 48
+    IF (278) 51 52 53
+    ELSE (279) 52
+    FOR (280) 65
+    WHILE (281) 63
+    LOOP (282) 78
+    PRINT (283) 81
+    PRINTLN (284) 80
+    FUNC (285) 23
+    RETURN (286) 26
+    BREAK (287) 79
+    ARROW (288) 21
+    AS (289) 94 95
+    IN (290) 65
+    DOTDOT (291) 76
+    RSHIFT (292)
+    LSHIFT (293) 130
+    INT_LIT <i_val> (294) 40 66
+    STRING_LIT <s_val> (295) 69
+    FLOAT_LIT <f_val> (296) 67
+    ID <s_val> (297) 23 24 25 28 29 30 31 32 33 34 35 36 37 38 40 42 55 57 59 61 65 76 90 92 94 97 126 127 128 129 130
+    LOWER_THAN_ELSE (298)
+
+
+非終結語詞，附有它們出現處的規則
+
+    $accept (64)
+        於左側： 0
+    Program (65)
+        於左側： 2
+        於右側： 0
+    $@1 (66)
+        於左側： 1
+        於右側： 2
+    GlobalStatementList (67)
+        於左側： 3 4
+        於右側： 2 3 21 50 65
+    GlobalStatement (68)
+        於左側： 5 6
+        於右側： 3 4
+    PackageStmt (69)
+        於左側： 7 8 9 10 11 12 13 14 15 16 17 18
+        於右側： 5
+    FunctionDeclStmt (70)
+        於左側： 19
+        於右側： 16
+    Func (71)
+        於左側： 21 22
+        於右側： 19
+    $@2 (72)
+        於左側： 20
+        於右側： 21
+    Funcname <s_val> (73)
+        於左側： 23
+        於右側： 21 22
+    Parameter <s_val> (74)
+        於左側： 24 25
+        於右側： 21 25
+    ReturnStmt (75)
+        於左側： 26 28
+        於右側： 17
+    $@3 (76)
+        於左側： 27
+        於右側： 28
+    Callfunc (77)
+        於左側： 29 30
+        於右側： 18 62
+    argument_expr_list (78)
+        於左側： 31 32
+        於右側： 30 31
+    DecStmt (79)
+        於左側： 33 34 35 36 37 38 40
+        於右側： 9
+    $@4 (80)
+        於左側： 39
+        於右側： 40
+    AssignStmt (81)
+        於左側： 41
+        於右側： 11
+    AssignmetExpr (82)
+        於左側： 42
+        於右側： 41
+    assign_op <s_val> (83)
+        於左側： 43 44 45 46 47 48
+        於右側： 42
+    Block (84)
+        於左側： 50
+        於右側： 10 22 51 52 53 63 78
+    $@5 (85)
+        於左側： 49
+        於右側： 50
+    IfStmt (86)
+        於左側： 51 52 53
+        於右側： 12 51
+    Condition (87)
+        於左側： 55 57 59 61 62
+        於右側： 51 52 53 63
+    $@6 (88)
+        於左側： 54
+        於右側： 55
+    $@7 (89)
+        於左側： 56
+        於右側： 57
+    $@8 (90)
+        於左側： 58
+        於右側： 59
+    $@9 (91)
+        於左側： 60
+        於右側： 61
+    WhileStmt (92)
+        於左側： 63
+        於右側： 13
+    ForStmt (93)
+        於左側： 65
+        於右側： 14
+    $@10 (94)
+        於左側： 64
+        於右側： 65
+    Lit <s_val> (95)
+        於左側： 66 67 68 69 70 71 72 73 76 77
+        於右側： 26 28 33 34 35 37 38 40 55 57 59 61 72 76 79 89 92 95 98
+    $@11 (96)
+        於左側： 74
+        於右側： 76
+    $@12 (97)
+        於左側： 75
+        於右側： 76
+    LoopStmt (98)
+        於左側： 78
+        於右側： 73
+    BreakStmt (99)
+        於左側： 79
+        於右側： 15
+    PrintLNStmt (100)
+        於左側： 80
+        於右側： 7
+    PrintStmt (101)
+        於左側： 81
+        於右側： 8
+    new_non (102)
+        於左側： 82 83
+        於右側： 52 81
+    Expression <s_val> (103)
+        於左側： 84 85 86 87 88 89 90 92 93
+        於右側： 42 80 81 86
+    $@13 (104)
+        於左側： 91
+        於右側： 92
+    AsStmt <s_val> (105)
+        於左側： 94 95 96 97 98
+        於右側： 84 107 109 125
+    Exp <s_val> (106)
+        於左側： 99 100
+        於右側： 85 96 99
+    Exp1 <s_val> (107)
+        於左側： 101 102
+        於右側： 99 100 101
+    Exp2 <s_val> (108)
+        於左側： 103 104
+        於右側： 101 102 103
+    Exp3 <s_val> (109)
+        於左側： 105 106
+        於右側： 103 104 105
+    Exp4 <s_val> (110)
+        於左側： 107 108
+        於右側： 105 106 107
+    uexpr <s_val> (111)
+        於左側： 109 110
+        於右側： 108 110
+    unary_op <s_val> (112)
+        於左側： 111 112 113
+        於右側： 110
+    com_op <s_val> (113)
+        於左側： 114 115 116 117 118 119
+        於右側： 103
+    add_op <s_val> (114)
+        於左側： 120 121
+        於右側： 105
+    mul_op <s_val> (115)
+        於左側： 122 123 124
+        於右側： 107
+    ExpressionExpr <s_val> (116)
+        於左側： 125 126 127 128 129 130
+        於右側： 93
+    TypeName <s_val> (117)
+        於左側： 131 132 133 134 135
+        於右側： 21 24 25 33 34 36 40 94 95
+
+
+狀態 0
+
+    0 $accept: • Program $end
+
+    $default  使用規則 1 以縮減 ($@1)
+
+    Program  進入狀態 1
+    $@1      進入狀態 2
+
+
+狀態 1
+
+    0 $accept: Program • $end
+
+    $end  偏移，並進入狀態 3
+
+
+狀態 2
+
+    2 Program: $@1 • GlobalStatementList
+
+    LET      偏移，並進入狀態 4
+    NEWLINE  偏移，並進入狀態 5
+    IF       偏移，並進入狀態 6
+    FOR      偏移，並進入狀態 7
+    WHILE    偏移，並進入狀態 8
+    PRINT    偏移，並進入狀態 9
+    PRINTLN  偏移，並進入狀態 10
+    FUNC     偏移，並進入狀態 11
+    RETURN   偏移，並進入狀態 12
+    BREAK    偏移，並進入狀態 13
+    ID       偏移，並進入狀態 14
+    '{'      偏移，並進入狀態 15
+
+    GlobalStatementList  進入狀態 16
+    GlobalStatement      進入狀態 17
+    PackageStmt          進入狀態 18
+    FunctionDeclStmt     進入狀態 19
+    Func                 進入狀態 20
+    Funcname             進入狀態 21
+    ReturnStmt           進入狀態 22
+    Callfunc             進入狀態 23
+    DecStmt              進入狀態 24
+    AssignStmt           進入狀態 25
+    AssignmetExpr        進入狀態 26
+    Block                進入狀態 27
+    IfStmt               進入狀態 28
+    WhileStmt            進入狀態 29
+    ForStmt              進入狀態 30
+    BreakStmt            進入狀態 31
+    PrintLNStmt          進入狀態 32
+    PrintStmt            進入狀態 33
+
+
+狀態 3
+
+    0 $accept: Program $end •
+
+    $default  接受
+
+
+狀態 4
+
+   33 DecStmt: LET • ID ':' TypeName '=' Lit ';'
+   34        | LET • MUT ID ':' TypeName '=' Lit ';'
+   35        | LET • MUT ID '=' Lit ';'
+   36        | LET • MUT ID ':' TypeName ';'
+   37        | LET • ID ':' Lit ';'
+   38        | LET • ID '=' Lit ';'
+   40        | LET • ID ':' '[' TypeName ';' INT_LIT $@4 ']' '=' '[' Lit ']' ';'
+
+    MUT  偏移，並進入狀態 34
+    ID   偏移，並進入狀態 35
+
+
+狀態 5
+
+    6 GlobalStatement: NEWLINE •
+
+    $default  使用規則 6 以縮減 (GlobalStatement)
+
+
+狀態 6
+
+   51 IfStmt: IF • Condition Block IfStmt
+   52       | IF • Condition Block new_non ELSE Block
+   53       | IF • Condition Block NEWLINE
+
+    ID  偏移，並進入狀態 36
+
+    Callfunc   進入狀態 37
+    Condition  進入狀態 38
+
+
+狀態 7
+
+   65 ForStmt: FOR • ID IN ID '{' $@10 GlobalStatementList '}'
+
+    ID  偏移，並進入狀態 39
+
+
+狀態 8
+
+   63 WhileStmt: WHILE • Condition Block
+
+    ID  偏移，並進入狀態 36
+
+    Callfunc   進入狀態 37
+    Condition  進入狀態 40
+
+
+狀態 9
+
+   81 PrintStmt: PRINT • '(' new_non Expression new_non ')' ';'
+
+    '('  偏移，並進入狀態 41
+
+
+狀態 10
+
+   80 PrintLNStmt: PRINTLN • '(' Expression ')' ';'
+
+    '('  偏移，並進入狀態 42
+
+
+狀態 11
+
+   23 Funcname: FUNC • ID
+
+    ID  偏移，並進入狀態 43
+
+
+狀態 12
+
+   26 ReturnStmt: RETURN • Lit ';'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 51
+    LoopStmt  進入狀態 52
+
+
+狀態 13
+
+   79 BreakStmt: BREAK • Lit ';'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 53
+    LoopStmt  進入狀態 52
+
+
+狀態 14
+
+   28 ReturnStmt: ID • '%' ID EQL $@3 Lit
+   29 Callfunc: ID • '(' ')' ';'
+   30         | ID • '(' argument_expr_list ')'
+   42 AssignmetExpr: ID • assign_op Expression
+
+    ADD_ASSIGN  偏移，並進入狀態 54
+    SUB_ASSIGN  偏移，並進入狀態 55
+    MUL_ASSIGN  偏移，並進入狀態 56
+    DIV_ASSIGN  偏移，並進入狀態 57
+    REM_ASSIGN  偏移，並進入狀態 58
+    '('         偏移，並進入狀態 59
+    '%'         偏移，並進入狀態 60
+    '='         偏移，並進入狀態 61
+
+    assign_op  進入狀態 62
+
+
+狀態 15
+
+   50 Block: '{' • $@5 GlobalStatementList '}'
+
+    $default  使用規則 49 以縮減 ($@5)
+
+    $@5  進入狀態 63
+
+
+狀態 16
+
+    2 Program: $@1 GlobalStatementList •
+    3 GlobalStatementList: GlobalStatementList • GlobalStatement
+
+    LET      偏移，並進入狀態 4
+    NEWLINE  偏移，並進入狀態 5
+    IF       偏移，並進入狀態 6
+    FOR      偏移，並進入狀態 7
+    WHILE    偏移，並進入狀態 8
+    PRINT    偏移，並進入狀態 9
+    PRINTLN  偏移，並進入狀態 10
+    FUNC     偏移，並進入狀態 11
+    RETURN   偏移，並進入狀態 12
+    BREAK    偏移，並進入狀態 13
+    ID       偏移，並進入狀態 14
+    '{'      偏移，並進入狀態 15
+
+    $default  使用規則 2 以縮減 (Program)
+
+    GlobalStatement   進入狀態 64
+    PackageStmt       進入狀態 18
+    FunctionDeclStmt  進入狀態 19
+    Func              進入狀態 20
+    Funcname          進入狀態 21
+    ReturnStmt        進入狀態 22
+    Callfunc          進入狀態 23
+    DecStmt           進入狀態 24
+    AssignStmt        進入狀態 25
+    AssignmetExpr     進入狀態 26
+    Block             進入狀態 27
+    IfStmt            進入狀態 28
+    WhileStmt         進入狀態 29
+    ForStmt           進入狀態 30
+    BreakStmt         進入狀態 31
+    PrintLNStmt       進入狀態 32
+    PrintStmt         進入狀態 33
+
+
+狀態 17
+
+    4 GlobalStatementList: GlobalStatement •
+
+    $default  使用規則 4 以縮減 (GlobalStatementList)
+
+
+狀態 18
+
+    5 GlobalStatement: PackageStmt •
+
+    $default  使用規則 5 以縮減 (GlobalStatement)
+
+
+狀態 19
+
+   16 PackageStmt: FunctionDeclStmt •
+
+    $default  使用規則 16 以縮減 (PackageStmt)
+
+
+狀態 20
+
+   19 FunctionDeclStmt: Func •
+
+    $default  使用規則 19 以縮減 (FunctionDeclStmt)
+
+
+狀態 21
+
+   21 Func: Funcname • '(' $@2 Parameter ')' ARROW TypeName '{' GlobalStatementList '}'
+   22     | Funcname • '(' ')' Block
+
+    '('  偏移，並進入狀態 65
+
+
+狀態 22
+
+   17 PackageStmt: ReturnStmt •
+
+    $default  使用規則 17 以縮減 (PackageStmt)
+
+
+狀態 23
+
+   18 PackageStmt: Callfunc •
+
+    $default  使用規則 18 以縮減 (PackageStmt)
+
+
+狀態 24
+
+    9 PackageStmt: DecStmt •
+
+    $default  使用規則 9 以縮減 (PackageStmt)
+
+
+狀態 25
+
+   11 PackageStmt: AssignStmt •
+
+    $default  使用規則 11 以縮減 (PackageStmt)
+
+
+狀態 26
+
+   41 AssignStmt: AssignmetExpr • ';'
+
+    ';'  偏移，並進入狀態 66
+
+
+狀態 27
+
+   10 PackageStmt: Block •
+
+    $default  使用規則 10 以縮減 (PackageStmt)
+
+
+狀態 28
+
+   12 PackageStmt: IfStmt •
+
+    $default  使用規則 12 以縮減 (PackageStmt)
+
+
+狀態 29
+
+   13 PackageStmt: WhileStmt •
+
+    $default  使用規則 13 以縮減 (PackageStmt)
+
+
+狀態 30
+
+   14 PackageStmt: ForStmt •
+
+    $default  使用規則 14 以縮減 (PackageStmt)
+
+
+狀態 31
+
+   15 PackageStmt: BreakStmt •
+
+    $default  使用規則 15 以縮減 (PackageStmt)
+
+
+狀態 32
+
+    7 PackageStmt: PrintLNStmt •
+
+    $default  使用規則 7 以縮減 (PackageStmt)
+
+
+狀態 33
+
+    8 PackageStmt: PrintStmt •
+
+    $default  使用規則 8 以縮減 (PackageStmt)
+
+
+狀態 34
+
+   34 DecStmt: LET MUT • ID ':' TypeName '=' Lit ';'
+   35        | LET MUT • ID '=' Lit ';'
+   36        | LET MUT • ID ':' TypeName ';'
+
+    ID  偏移，並進入狀態 67
+
+
+狀態 35
+
+   33 DecStmt: LET ID • ':' TypeName '=' Lit ';'
+   37        | LET ID • ':' Lit ';'
+   38        | LET ID • '=' Lit ';'
+   40        | LET ID • ':' '[' TypeName ';' INT_LIT $@4 ']' '=' '[' Lit ']' ';'
+
+    ':'  偏移，並進入狀態 68
+    '='  偏移，並進入狀態 69
+
+
+狀態 36
+
+   29 Callfunc: ID • '(' ')' ';'
+   30         | ID • '(' argument_expr_list ')'
+   55 Condition: ID • $@6 '>' Lit
+   57          | ID • $@7 NEQ Lit
+   59          | ID • $@8 EQL Lit
+   61          | ID • $@9 '<' Lit
+
+    '('  偏移，並進入狀態 59
+
+    EQL       使用規則 58 以縮減 ($@8)
+    NEQ       使用規則 56 以縮減 ($@7)
+    '<'       使用規則 60 以縮減 ($@9)
+    $default  使用規則 54 以縮減 ($@6)
+
+    $@6  進入狀態 70
+    $@7  進入狀態 71
+    $@8  進入狀態 72
+    $@9  進入狀態 73
+
+
+狀態 37
+
+   62 Condition: Callfunc •
+
+    $default  使用規則 62 以縮減 (Condition)
+
+
+狀態 38
+
+   51 IfStmt: IF Condition • Block IfStmt
+   52       | IF Condition • Block new_non ELSE Block
+   53       | IF Condition • Block NEWLINE
+
+    '{'  偏移，並進入狀態 15
+
+    Block  進入狀態 74
+
+
+狀態 39
+
+   65 ForStmt: FOR ID • IN ID '{' $@10 GlobalStatementList '}'
+
+    IN  偏移，並進入狀態 75
+
+
+狀態 40
+
+   63 WhileStmt: WHILE Condition • Block
+
+    '{'  偏移，並進入狀態 15
+
+    Block  進入狀態 76
+
+
+狀態 41
+
+   81 PrintStmt: PRINT '(' • new_non Expression new_non ')' ';'
+
+    NEWLINE  偏移，並進入狀態 77
+
+    NEWLINE   [使用規則 82 以縮減 (new_non)]
+    $default  使用規則 82 以縮減 (new_non)
+
+    new_non  進入狀態 78
+
+
+狀態 42
+
+   80 PrintLNStmt: PRINTLN '(' • Expression ')' ';'
+
+    NEWLINE    偏移，並進入狀態 79
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 80
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+    '!'        偏移，並進入狀態 82
+    '-'        偏移，並進入狀態 83
+    '+'        偏移，並進入狀態 84
+
+    ')'       使用規則 77 以縮減 (Lit)
+    ')'       [使用規則 88 以縮減 (Expression)]
+    '-'       [使用規則 77 以縮減 (Lit)]
+    '+'       [使用規則 77 以縮減 (Lit)]
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit             進入狀態 85
+    LoopStmt        進入狀態 52
+    Expression      進入狀態 86
+    AsStmt          進入狀態 87
+    Exp             進入狀態 88
+    Exp1            進入狀態 89
+    Exp2            進入狀態 90
+    Exp3            進入狀態 91
+    Exp4            進入狀態 92
+    uexpr           進入狀態 93
+    unary_op        進入狀態 94
+    ExpressionExpr  進入狀態 95
+
+
+狀態 43
+
+   23 Funcname: FUNC ID •
+
+    $default  使用規則 23 以縮減 (Funcname)
+
+
+狀態 44
+
+   70 Lit: TRUE •
+
+    $default  使用規則 70 以縮減 (Lit)
+
+
+狀態 45
+
+   71 Lit: FALSE •
+
+    $default  使用規則 71 以縮減 (Lit)
+
+
+狀態 46
+
+   78 LoopStmt: LOOP • Block
+
+    '{'  偏移，並進入狀態 15
+
+    Block  進入狀態 96
+
+
+狀態 47
+
+   66 Lit: INT_LIT •
+
+    $default  使用規則 66 以縮減 (Lit)
+
+
+狀態 48
+
+   67 Lit: FLOAT_LIT •
+
+    $default  使用規則 67 以縮減 (Lit)
+
+
+狀態 49
+
+   68 Lit: '"' • '"'
+   69    | '"' • STRING_LIT '"'
+
+    STRING_LIT  偏移，並進入狀態 97
+    '"'         偏移，並進入狀態 98
+
+
+狀態 50
+
+   76 Lit: '&' • ID $@11 '[' Lit DOTDOT $@12 Lit ']'
+
+    ID  偏移，並進入狀態 99
+
+
+狀態 51
+
+   26 ReturnStmt: RETURN Lit • ';'
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+    ';'  偏移，並進入狀態 101
+
+
+狀態 52
+
+   73 Lit: LoopStmt •
+
+    $default  使用規則 73 以縮減 (Lit)
+
+
+狀態 53
+
+   72 Lit: Lit • ',' Lit
+   79 BreakStmt: BREAK Lit • ';'
+
+    ','  偏移，並進入狀態 100
+    ';'  偏移，並進入狀態 102
+
+
+狀態 54
+
+   44 assign_op: ADD_ASSIGN •
+
+    $default  使用規則 44 以縮減 (assign_op)
+
+
+狀態 55
+
+   45 assign_op: SUB_ASSIGN •
+
+    $default  使用規則 45 以縮減 (assign_op)
+
+
+狀態 56
+
+   46 assign_op: MUL_ASSIGN •
+
+    $default  使用規則 46 以縮減 (assign_op)
+
+
+狀態 57
+
+   47 assign_op: DIV_ASSIGN •
+
+    $default  使用規則 47 以縮減 (assign_op)
+
+
+狀態 58
+
+   48 assign_op: REM_ASSIGN •
+
+    $default  使用規則 48 以縮減 (assign_op)
+
+
+狀態 59
+
+   29 Callfunc: ID '(' • ')' ';'
+   30         | ID '(' • argument_expr_list ')'
+
+    ID   偏移，並進入狀態 103
+    ')'  偏移，並進入狀態 104
+
+    argument_expr_list  進入狀態 105
+
+
+狀態 60
+
+   28 ReturnStmt: ID '%' • ID EQL $@3 Lit
+
+    ID  偏移，並進入狀態 106
+
+
+狀態 61
+
+   43 assign_op: '=' •
+
+    $default  使用規則 43 以縮減 (assign_op)
+
+
+狀態 62
+
+   42 AssignmetExpr: ID assign_op • Expression
+
+    NEWLINE    偏移，並進入狀態 79
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 80
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+    '!'        偏移，並進入狀態 82
+    '-'        偏移，並進入狀態 83
+    '+'        偏移，並進入狀態 84
+
+    ';'       使用規則 77 以縮減 (Lit)
+    ';'       [使用規則 88 以縮減 (Expression)]
+    '-'       [使用規則 77 以縮減 (Lit)]
+    '+'       [使用規則 77 以縮減 (Lit)]
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit             進入狀態 85
+    LoopStmt        進入狀態 52
+    Expression      進入狀態 107
+    AsStmt          進入狀態 87
+    Exp             進入狀態 88
+    Exp1            進入狀態 89
+    Exp2            進入狀態 90
+    Exp3            進入狀態 91
+    Exp4            進入狀態 92
+    uexpr           進入狀態 93
+    unary_op        進入狀態 94
+    ExpressionExpr  進入狀態 95
+
+
+狀態 63
+
+   50 Block: '{' $@5 • GlobalStatementList '}'
+
+    LET      偏移，並進入狀態 4
+    NEWLINE  偏移，並進入狀態 5
+    IF       偏移，並進入狀態 6
+    FOR      偏移，並進入狀態 7
+    WHILE    偏移，並進入狀態 8
+    PRINT    偏移，並進入狀態 9
+    PRINTLN  偏移，並進入狀態 10
+    FUNC     偏移，並進入狀態 11
+    RETURN   偏移，並進入狀態 12
+    BREAK    偏移，並進入狀態 13
+    ID       偏移，並進入狀態 14
+    '{'      偏移，並進入狀態 15
+
+    GlobalStatementList  進入狀態 108
+    GlobalStatement      進入狀態 17
+    PackageStmt          進入狀態 18
+    FunctionDeclStmt     進入狀態 19
+    Func                 進入狀態 20
+    Funcname             進入狀態 21
+    ReturnStmt           進入狀態 22
+    Callfunc             進入狀態 23
+    DecStmt              進入狀態 24
+    AssignStmt           進入狀態 25
+    AssignmetExpr        進入狀態 26
+    Block                進入狀態 27
+    IfStmt               進入狀態 28
+    WhileStmt            進入狀態 29
+    ForStmt              進入狀態 30
+    BreakStmt            進入狀態 31
+    PrintLNStmt          進入狀態 32
+    PrintStmt            進入狀態 33
+
+
+狀態 64
+
+    3 GlobalStatementList: GlobalStatementList GlobalStatement •
+
+    $default  使用規則 3 以縮減 (GlobalStatementList)
+
+
+狀態 65
+
+   21 Func: Funcname '(' • $@2 Parameter ')' ARROW TypeName '{' GlobalStatementList '}'
+   22     | Funcname '(' • ')' Block
+
+    ')'  偏移，並進入狀態 109
+
+    $default  使用規則 20 以縮減 ($@2)
+
+    $@2  進入狀態 110
+
+
+狀態 66
+
+   41 AssignStmt: AssignmetExpr ';' •
+
+    $default  使用規則 41 以縮減 (AssignStmt)
+
+
+狀態 67
+
+   34 DecStmt: LET MUT ID • ':' TypeName '=' Lit ';'
+   35        | LET MUT ID • '=' Lit ';'
+   36        | LET MUT ID • ':' TypeName ';'
+
+    ':'  偏移，並進入狀態 111
+    '='  偏移，並進入狀態 112
+
+
+狀態 68
+
+   33 DecStmt: LET ID ':' • TypeName '=' Lit ';'
+   37        | LET ID ':' • Lit ';'
+   40        | LET ID ':' • '[' TypeName ';' INT_LIT $@4 ']' '=' '[' Lit ']' ';'
+
+    INT        偏移，並進入狀態 113
+    FLOAT      偏移，並進入狀態 114
+    BOOL       偏移，並進入狀態 115
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '['        偏移，並進入狀態 116
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 117
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 118
+    LoopStmt  進入狀態 52
+    TypeName  進入狀態 119
+
+
+狀態 69
+
+   38 DecStmt: LET ID '=' • Lit ';'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 120
+    LoopStmt  進入狀態 52
+
+
+狀態 70
+
+   55 Condition: ID $@6 • '>' Lit
+
+    '>'  偏移，並進入狀態 121
+
+
+狀態 71
+
+   57 Condition: ID $@7 • NEQ Lit
+
+    NEQ  偏移，並進入狀態 122
+
+
+狀態 72
+
+   59 Condition: ID $@8 • EQL Lit
+
+    EQL  偏移，並進入狀態 123
+
+
+狀態 73
+
+   61 Condition: ID $@9 • '<' Lit
+
+    '<'  偏移，並進入狀態 124
+
+
+狀態 74
+
+   51 IfStmt: IF Condition Block • IfStmt
+   52       | IF Condition Block • new_non ELSE Block
+   53       | IF Condition Block • NEWLINE
+
+    NEWLINE  偏移，並進入狀態 125
+    IF       偏移，並進入狀態 6
+
+    $default  使用規則 82 以縮減 (new_non)
+
+    IfStmt   進入狀態 126
+    new_non  進入狀態 127
+
+
+狀態 75
+
+   65 ForStmt: FOR ID IN • ID '{' $@10 GlobalStatementList '}'
+
+    ID  偏移，並進入狀態 128
+
+
+狀態 76
+
+   63 WhileStmt: WHILE Condition Block •
+
+    $default  使用規則 63 以縮減 (WhileStmt)
+
+
+狀態 77
+
+   83 new_non: NEWLINE •
+
+    $default  使用規則 83 以縮減 (new_non)
+
+
+狀態 78
+
+   81 PrintStmt: PRINT '(' new_non • Expression new_non ')' ';'
+
+    NEWLINE    偏移，並進入狀態 79
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 80
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+    '!'        偏移，並進入狀態 82
+    '-'        偏移，並進入狀態 83
+    '+'        偏移，並進入狀態 84
+
+    NEWLINE   [使用規則 77 以縮減 (Lit)]
+    NEWLINE   [使用規則 88 以縮減 (Expression)]
+    ')'       使用規則 77 以縮減 (Lit)
+    ')'       [使用規則 88 以縮減 (Expression)]
+    '-'       [使用規則 77 以縮減 (Lit)]
+    '+'       [使用規則 77 以縮減 (Lit)]
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit             進入狀態 85
+    LoopStmt        進入狀態 52
+    Expression      進入狀態 129
+    AsStmt          進入狀態 87
+    Exp             進入狀態 88
+    Exp1            進入狀態 89
+    Exp2            進入狀態 90
+    Exp3            進入狀態 91
+    Exp4            進入狀態 92
+    uexpr           進入狀態 93
+    unary_op        進入狀態 94
+    ExpressionExpr  進入狀態 95
+
+
+狀態 79
+
+   86 Expression: NEWLINE • Expression
+   87           | NEWLINE •
+
+    NEWLINE    偏移，並進入狀態 79
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 80
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+    '!'        偏移，並進入狀態 82
+    '-'        偏移，並進入狀態 83
+    '+'        偏移，並進入狀態 84
+
+    NEWLINE   [使用規則 77 以縮減 (Lit)]
+    NEWLINE   [使用規則 87 以縮減 (Expression)]
+    NEWLINE   [使用規則 88 以縮減 (Expression)]
+    ')'       使用規則 77 以縮減 (Lit)
+    ')'       [使用規則 87 以縮減 (Expression)]
+    ')'       [使用規則 88 以縮減 (Expression)]
+    ';'       使用規則 77 以縮減 (Lit)
+    ';'       [使用規則 87 以縮減 (Expression)]
+    ';'       [使用規則 88 以縮減 (Expression)]
+    '-'       [使用規則 77 以縮減 (Lit)]
+    '+'       [使用規則 77 以縮減 (Lit)]
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit             進入狀態 85
+    LoopStmt        進入狀態 52
+    Expression      進入狀態 130
+    AsStmt          進入狀態 87
+    Exp             進入狀態 88
+    Exp1            進入狀態 89
+    Exp2            進入狀態 90
+    Exp3            進入狀態 91
+    Exp4            進入狀態 92
+    uexpr           進入狀態 93
+    unary_op        進入狀態 94
+    ExpressionExpr  進入狀態 95
+
+
+狀態 80
+
+   90 Expression: ID •
+   92           | ID • $@13 '[' Lit ']'
+   94 AsStmt: ID • AS TypeName
+   97       | ID •
+  126 ExpressionExpr: ID • '-' ID
+  127               | ID • '*' ID
+  128               | ID • '/' ID
+  129               | ID • '%' ID
+  130               | ID • LSHIFT ID
+
+    AS      偏移，並進入狀態 131
+    LSHIFT  偏移，並進入狀態 132
+    '%'     偏移，並進入狀態 133
+    '-'     偏移，並進入狀態 134
+    '/'     偏移，並進入狀態 135
+    '*'     偏移，並進入狀態 136
+
+    NEWLINE   使用規則 90 以縮減 (Expression)
+    NEWLINE   [使用規則 97 以縮減 (AsStmt)]
+    ')'       使用規則 90 以縮減 (Expression)
+    ')'       [使用規則 97 以縮減 (AsStmt)]
+    ';'       使用規則 90 以縮減 (Expression)
+    ';'       [使用規則 97 以縮減 (AsStmt)]
+    '%'       [使用規則 97 以縮減 (AsStmt)]
+    '['       使用規則 91 以縮減 ($@13)
+    '-'       [使用規則 97 以縮減 (AsStmt)]
+    '/'       [使用規則 97 以縮減 (AsStmt)]
+    '*'       [使用規則 97 以縮減 (AsStmt)]
+    $default  使用規則 97 以縮減 (AsStmt)
+
+    $@13  進入狀態 137
+
+
+狀態 81
+
+   96 AsStmt: '(' • Exp ')'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 138
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+    '!'        偏移，並進入狀態 82
+    '-'        偏移，並進入狀態 83
+    '+'        偏移，並進入狀態 84
+
+    '-'       [使用規則 77 以縮減 (Lit)]
+    '+'       [使用規則 77 以縮減 (Lit)]
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 139
+    LoopStmt  進入狀態 52
+    AsStmt    進入狀態 140
+    Exp       進入狀態 141
+    Exp1      進入狀態 89
+    Exp2      進入狀態 90
+    Exp3      進入狀態 91
+    Exp4      進入狀態 92
+    uexpr     進入狀態 93
+    unary_op  進入狀態 94
+
+
+狀態 82
+
+  113 unary_op: '!' •
+
+    $default  使用規則 113 以縮減 (unary_op)
+
+
+狀態 83
+
+  112 unary_op: '-' •
+
+    $default  使用規則 112 以縮減 (unary_op)
+
+
+狀態 84
+
+  111 unary_op: '+' •
+
+    $default  使用規則 111 以縮減 (unary_op)
+
+
+狀態 85
+
+   72 Lit: Lit • ',' Lit
+   89 Expression: Lit •
+   95 AsStmt: Lit • AS TypeName
+   98       | Lit •
+
+    AS   偏移，並進入狀態 142
+    ','  偏移，並進入狀態 100
+
+    NEWLINE   使用規則 89 以縮減 (Expression)
+    NEWLINE   [使用規則 98 以縮減 (AsStmt)]
+    ')'       使用規則 89 以縮減 (Expression)
+    ')'       [使用規則 98 以縮減 (AsStmt)]
+    ';'       使用規則 89 以縮減 (Expression)
+    ';'       [使用規則 98 以縮減 (AsStmt)]
+    $default  使用規則 98 以縮減 (AsStmt)
+
+
+狀態 86
+
+   80 PrintLNStmt: PRINTLN '(' Expression • ')' ';'
+
+    ')'  偏移，並進入狀態 143
+
+
+狀態 87
+
+   84 Expression: AsStmt •
+  109 uexpr: AsStmt •
+  125 ExpressionExpr: AsStmt • '+' AsStmt
+
+    '+'  偏移，並進入狀態 144
+
+    NEWLINE   使用規則 84 以縮減 (Expression)
+    NEWLINE   [使用規則 109 以縮減 (uexpr)]
+    ')'       使用規則 84 以縮減 (Expression)
+    ')'       [使用規則 109 以縮減 (uexpr)]
+    ';'       使用規則 84 以縮減 (Expression)
+    ';'       [使用規則 109 以縮減 (uexpr)]
+    '+'       [使用規則 109 以縮減 (uexpr)]
+    $default  使用規則 109 以縮減 (uexpr)
+
+
+狀態 88
+
+   85 Expression: Exp •
+   99 Exp: Exp • LOR Exp1
+
+    LOR  偏移，並進入狀態 145
+
+    $default  使用規則 85 以縮減 (Expression)
+
+
+狀態 89
+
+  100 Exp: Exp1 •
+  101 Exp1: Exp1 • LAND Exp2
+
+    LAND  偏移，並進入狀態 146
+
+    $default  使用規則 100 以縮減 (Exp)
+
+
+狀態 90
+
+  102 Exp1: Exp2 •
+  103 Exp2: Exp2 • com_op Exp3
+
+    GEQ  偏移，並進入狀態 147
+    LEQ  偏移，並進入狀態 148
+    EQL  偏移，並進入狀態 149
+    NEQ  偏移，並進入狀態 150
+    '>'  偏移，並進入狀態 151
+    '<'  偏移，並進入狀態 152
+
+    $default  使用規則 102 以縮減 (Exp1)
+
+    com_op  進入狀態 153
+
+
+狀態 91
+
+  104 Exp2: Exp3 •
+  105 Exp3: Exp3 • add_op Exp4
+
+    '-'  偏移，並進入狀態 154
+    '+'  偏移，並進入狀態 155
+
+    $default  使用規則 104 以縮減 (Exp2)
+
+    add_op  進入狀態 156
+
+
+狀態 92
+
+  106 Exp3: Exp4 •
+  107 Exp4: Exp4 • mul_op AsStmt
+
+    '%'  偏移，並進入狀態 157
+    '/'  偏移，並進入狀態 158
+    '*'  偏移，並進入狀態 159
+
+    $default  使用規則 106 以縮減 (Exp3)
+
+    mul_op  進入狀態 160
+
+
+狀態 93
+
+  108 Exp4: uexpr •
+
+    $default  使用規則 108 以縮減 (Exp4)
+
+
+狀態 94
+
+  110 uexpr: unary_op • uexpr
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 138
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+    '!'        偏移，並進入狀態 82
+    '-'        偏移，並進入狀態 83
+    '+'        偏移，並進入狀態 84
+
+    '-'       [使用規則 77 以縮減 (Lit)]
+    '+'       [使用規則 77 以縮減 (Lit)]
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 139
+    LoopStmt  進入狀態 52
+    AsStmt    進入狀態 140
+    uexpr     進入狀態 161
+    unary_op  進入狀態 94
+
+
+狀態 95
+
+   93 Expression: ExpressionExpr •
+
+    $default  使用規則 93 以縮減 (Expression)
+
+
+狀態 96
+
+   78 LoopStmt: LOOP Block •
+
+    $default  使用規則 78 以縮減 (LoopStmt)
+
+
+狀態 97
+
+   69 Lit: '"' STRING_LIT • '"'
+
+    '"'  偏移，並進入狀態 162
+
+
+狀態 98
+
+   68 Lit: '"' '"' •
+
+    $default  使用規則 68 以縮減 (Lit)
+
+
+狀態 99
+
+   76 Lit: '&' ID • $@11 '[' Lit DOTDOT $@12 Lit ']'
+
+    $default  使用規則 74 以縮減 ($@11)
+
+    $@11  進入狀態 163
+
+
+狀態 100
+
+   72 Lit: Lit ',' • Lit
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 164
+    LoopStmt  進入狀態 52
+
+
+狀態 101
+
+   26 ReturnStmt: RETURN Lit ';' •
+
+    $default  使用規則 26 以縮減 (ReturnStmt)
+
+
+狀態 102
+
+   79 BreakStmt: BREAK Lit ';' •
+
+    $default  使用規則 79 以縮減 (BreakStmt)
+
+
+狀態 103
+
+   32 argument_expr_list: ID •
+
+    $default  使用規則 32 以縮減 (argument_expr_list)
+
+
+狀態 104
+
+   29 Callfunc: ID '(' ')' • ';'
+
+    ';'  偏移，並進入狀態 165
+
+
+狀態 105
+
+   30 Callfunc: ID '(' argument_expr_list • ')'
+   31 argument_expr_list: argument_expr_list • ',' ID
+
+    ')'  偏移，並進入狀態 166
+    ','  偏移，並進入狀態 167
+
+
+狀態 106
+
+   28 ReturnStmt: ID '%' ID • EQL $@3 Lit
+
+    EQL  偏移，並進入狀態 168
+
+
+狀態 107
+
+   42 AssignmetExpr: ID assign_op Expression •
+
+    $default  使用規則 42 以縮減 (AssignmetExpr)
+
+
+狀態 108
+
+    3 GlobalStatementList: GlobalStatementList • GlobalStatement
+   50 Block: '{' $@5 GlobalStatementList • '}'
+
+    LET      偏移，並進入狀態 4
+    NEWLINE  偏移，並進入狀態 5
+    IF       偏移，並進入狀態 6
+    FOR      偏移，並進入狀態 7
+    WHILE    偏移，並進入狀態 8
+    PRINT    偏移，並進入狀態 9
+    PRINTLN  偏移，並進入狀態 10
+    FUNC     偏移，並進入狀態 11
+    RETURN   偏移，並進入狀態 12
+    BREAK    偏移，並進入狀態 13
+    ID       偏移，並進入狀態 14
+    '{'      偏移，並進入狀態 15
+    '}'      偏移，並進入狀態 169
+
+    GlobalStatement   進入狀態 64
+    PackageStmt       進入狀態 18
+    FunctionDeclStmt  進入狀態 19
+    Func              進入狀態 20
+    Funcname          進入狀態 21
+    ReturnStmt        進入狀態 22
+    Callfunc          進入狀態 23
+    DecStmt           進入狀態 24
+    AssignStmt        進入狀態 25
+    AssignmetExpr     進入狀態 26
+    Block             進入狀態 27
+    IfStmt            進入狀態 28
+    WhileStmt         進入狀態 29
+    ForStmt           進入狀態 30
+    BreakStmt         進入狀態 31
+    PrintLNStmt       進入狀態 32
+    PrintStmt         進入狀態 33
+
+
+狀態 109
+
+   22 Func: Funcname '(' ')' • Block
+
+    '{'  偏移，並進入狀態 15
+
+    Block  進入狀態 170
+
+
+狀態 110
+
+   21 Func: Funcname '(' $@2 • Parameter ')' ARROW TypeName '{' GlobalStatementList '}'
+
+    ID  偏移，並進入狀態 171
+
+    Parameter  進入狀態 172
+
+
+狀態 111
+
+   34 DecStmt: LET MUT ID ':' • TypeName '=' Lit ';'
+   36        | LET MUT ID ':' • TypeName ';'
+
+    INT    偏移，並進入狀態 113
+    FLOAT  偏移，並進入狀態 114
+    BOOL   偏移，並進入狀態 115
+    '&'    偏移，並進入狀態 173
+
+    TypeName  進入狀態 174
+
+
+狀態 112
+
+   35 DecStmt: LET MUT ID '=' • Lit ';'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 175
+    LoopStmt  進入狀態 52
+
+
+狀態 113
+
+  131 TypeName: INT •
+
+    $default  使用規則 131 以縮減 (TypeName)
+
+
+狀態 114
+
+  132 TypeName: FLOAT •
+
+    $default  使用規則 132 以縮減 (TypeName)
+
+
+狀態 115
+
+  135 TypeName: BOOL •
+
+    $default  使用規則 135 以縮減 (TypeName)
+
+
+狀態 116
+
+   40 DecStmt: LET ID ':' '[' • TypeName ';' INT_LIT $@4 ']' '=' '[' Lit ']' ';'
+
+    INT    偏移，並進入狀態 113
+    FLOAT  偏移，並進入狀態 114
+    BOOL   偏移，並進入狀態 115
+    '&'    偏移，並進入狀態 173
+
+    TypeName  進入狀態 176
+
+
+狀態 117
+
+   76 Lit: '&' • ID $@11 '[' Lit DOTDOT $@12 Lit ']'
+  133 TypeName: '&' •
+  134         | '&' • STR
+
+    STR  偏移，並進入狀態 177
+    ID   偏移，並進入狀態 99
+
+    $default  使用規則 133 以縮減 (TypeName)
+
+
+狀態 118
+
+   37 DecStmt: LET ID ':' Lit • ';'
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+    ';'  偏移，並進入狀態 178
+
+
+狀態 119
+
+   33 DecStmt: LET ID ':' TypeName • '=' Lit ';'
+
+    '='  偏移，並進入狀態 179
+
+
+狀態 120
+
+   38 DecStmt: LET ID '=' Lit • ';'
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+    ';'  偏移，並進入狀態 180
+
+
+狀態 121
+
+   55 Condition: ID $@6 '>' • Lit
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 181
+    LoopStmt  進入狀態 52
+
+
+狀態 122
+
+   57 Condition: ID $@7 NEQ • Lit
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 182
+    LoopStmt  進入狀態 52
+
+
+狀態 123
+
+   59 Condition: ID $@8 EQL • Lit
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 183
+    LoopStmt  進入狀態 52
+
+
+狀態 124
+
+   61 Condition: ID $@9 '<' • Lit
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 184
+    LoopStmt  進入狀態 52
+
+
+狀態 125
+
+   53 IfStmt: IF Condition Block NEWLINE •
+   83 new_non: NEWLINE •
+
+    ELSE      使用規則 83 以縮減 (new_non)
+    $default  使用規則 53 以縮減 (IfStmt)
+
+
+狀態 126
+
+   51 IfStmt: IF Condition Block IfStmt •
+
+    $default  使用規則 51 以縮減 (IfStmt)
+
+
+狀態 127
+
+   52 IfStmt: IF Condition Block new_non • ELSE Block
+
+    ELSE  偏移，並進入狀態 185
+
+
+狀態 128
+
+   65 ForStmt: FOR ID IN ID • '{' $@10 GlobalStatementList '}'
+
+    '{'  偏移，並進入狀態 186
+
+
+狀態 129
+
+   81 PrintStmt: PRINT '(' new_non Expression • new_non ')' ';'
+
+    NEWLINE  偏移，並進入狀態 77
+
+    $default  使用規則 82 以縮減 (new_non)
+
+    new_non  進入狀態 187
+
+
+狀態 130
+
+   86 Expression: NEWLINE Expression •
+
+    $default  使用規則 86 以縮減 (Expression)
+
+
+狀態 131
+
+   94 AsStmt: ID AS • TypeName
+
+    INT    偏移，並進入狀態 113
+    FLOAT  偏移，並進入狀態 114
+    BOOL   偏移，並進入狀態 115
+    '&'    偏移，並進入狀態 173
+
+    TypeName  進入狀態 188
+
+
+狀態 132
+
+  130 ExpressionExpr: ID LSHIFT • ID
+
+    ID  偏移，並進入狀態 189
+
+
+狀態 133
+
+  129 ExpressionExpr: ID '%' • ID
+
+    ID  偏移，並進入狀態 190
+
+
+狀態 134
+
+  126 ExpressionExpr: ID '-' • ID
+
+    ID  偏移，並進入狀態 191
+
+
+狀態 135
+
+  128 ExpressionExpr: ID '/' • ID
+
+    ID  偏移，並進入狀態 192
+
+
+狀態 136
+
+  127 ExpressionExpr: ID '*' • ID
+
+    ID  偏移，並進入狀態 193
+
+
+狀態 137
+
+   92 Expression: ID $@13 • '[' Lit ']'
+
+    '['  偏移，並進入狀態 194
+
+
+狀態 138
+
+   94 AsStmt: ID • AS TypeName
+   97       | ID •
+
+    AS  偏移，並進入狀態 131
+
+    $default  使用規則 97 以縮減 (AsStmt)
+
+
+狀態 139
+
+   72 Lit: Lit • ',' Lit
+   95 AsStmt: Lit • AS TypeName
+   98       | Lit •
+
+    AS   偏移，並進入狀態 142
+    ','  偏移，並進入狀態 100
+
+    $default  使用規則 98 以縮減 (AsStmt)
+
+
+狀態 140
+
+  109 uexpr: AsStmt •
+
+    $default  使用規則 109 以縮減 (uexpr)
+
+
+狀態 141
+
+   96 AsStmt: '(' Exp • ')'
+   99 Exp: Exp • LOR Exp1
+
+    LOR  偏移，並進入狀態 145
+    ')'  偏移，並進入狀態 195
+
+
+狀態 142
+
+   95 AsStmt: Lit AS • TypeName
+
+    INT    偏移，並進入狀態 113
+    FLOAT  偏移，並進入狀態 114
+    BOOL   偏移，並進入狀態 115
+    '&'    偏移，並進入狀態 173
+
+    TypeName  進入狀態 196
+
+
+狀態 143
+
+   80 PrintLNStmt: PRINTLN '(' Expression ')' • ';'
+
+    ';'  偏移，並進入狀態 197
+
+
+狀態 144
+
+  125 ExpressionExpr: AsStmt '+' • AsStmt
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 138
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 139
+    LoopStmt  進入狀態 52
+    AsStmt    進入狀態 198
+
+
+狀態 145
+
+   99 Exp: Exp LOR • Exp1
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 138
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+    '!'        偏移，並進入狀態 82
+    '-'        偏移，並進入狀態 83
+    '+'        偏移，並進入狀態 84
+
+    '-'       [使用規則 77 以縮減 (Lit)]
+    '+'       [使用規則 77 以縮減 (Lit)]
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 139
+    LoopStmt  進入狀態 52
+    AsStmt    進入狀態 140
+    Exp1      進入狀態 199
+    Exp2      進入狀態 90
+    Exp3      進入狀態 91
+    Exp4      進入狀態 92
+    uexpr     進入狀態 93
+    unary_op  進入狀態 94
+
+
+狀態 146
+
+  101 Exp1: Exp1 LAND • Exp2
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 138
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+    '!'        偏移，並進入狀態 82
+    '-'        偏移，並進入狀態 83
+    '+'        偏移，並進入狀態 84
+
+    '-'       [使用規則 77 以縮減 (Lit)]
+    '+'       [使用規則 77 以縮減 (Lit)]
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 139
+    LoopStmt  進入狀態 52
+    AsStmt    進入狀態 140
+    Exp2      進入狀態 200
+    Exp3      進入狀態 91
+    Exp4      進入狀態 92
+    uexpr     進入狀態 93
+    unary_op  進入狀態 94
+
+
+狀態 147
+
+  116 com_op: GEQ •
+
+    $default  使用規則 116 以縮減 (com_op)
+
+
+狀態 148
+
+  117 com_op: LEQ •
+
+    $default  使用規則 117 以縮減 (com_op)
+
+
+狀態 149
+
+  118 com_op: EQL •
+
+    $default  使用規則 118 以縮減 (com_op)
+
+
+狀態 150
+
+  119 com_op: NEQ •
+
+    $default  使用規則 119 以縮減 (com_op)
+
+
+狀態 151
+
+  114 com_op: '>' •
+
+    $default  使用規則 114 以縮減 (com_op)
+
+
+狀態 152
+
+  115 com_op: '<' •
+
+    $default  使用規則 115 以縮減 (com_op)
+
+
+狀態 153
+
+  103 Exp2: Exp2 com_op • Exp3
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 138
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+    '!'        偏移，並進入狀態 82
+    '-'        偏移，並進入狀態 83
+    '+'        偏移，並進入狀態 84
+
+    '-'       [使用規則 77 以縮減 (Lit)]
+    '+'       [使用規則 77 以縮減 (Lit)]
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 139
+    LoopStmt  進入狀態 52
+    AsStmt    進入狀態 140
+    Exp3      進入狀態 201
+    Exp4      進入狀態 92
+    uexpr     進入狀態 93
+    unary_op  進入狀態 94
+
+
+狀態 154
+
+  121 add_op: '-' •
+
+    $default  使用規則 121 以縮減 (add_op)
+
+
+狀態 155
+
+  120 add_op: '+' •
+
+    $default  使用規則 120 以縮減 (add_op)
+
+
+狀態 156
+
+  105 Exp3: Exp3 add_op • Exp4
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 138
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+    '!'        偏移，並進入狀態 82
+    '-'        偏移，並進入狀態 83
+    '+'        偏移，並進入狀態 84
+
+    '-'       [使用規則 77 以縮減 (Lit)]
+    '+'       [使用規則 77 以縮減 (Lit)]
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 139
+    LoopStmt  進入狀態 52
+    AsStmt    進入狀態 140
+    Exp4      進入狀態 202
+    uexpr     進入狀態 93
+    unary_op  進入狀態 94
+
+
+狀態 157
+
+  124 mul_op: '%' •
+
+    $default  使用規則 124 以縮減 (mul_op)
+
+
+狀態 158
+
+  123 mul_op: '/' •
+
+    $default  使用規則 123 以縮減 (mul_op)
+
+
+狀態 159
+
+  122 mul_op: '*' •
+
+    $default  使用規則 122 以縮減 (mul_op)
+
+
+狀態 160
+
+  107 Exp4: Exp4 mul_op • AsStmt
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    ID         偏移，並進入狀態 138
+    '('        偏移，並進入狀態 81
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 139
+    LoopStmt  進入狀態 52
+    AsStmt    進入狀態 203
+
+
+狀態 161
+
+  110 uexpr: unary_op uexpr •
+
+    $default  使用規則 110 以縮減 (uexpr)
+
+
+狀態 162
+
+   69 Lit: '"' STRING_LIT '"' •
+
+    $default  使用規則 69 以縮減 (Lit)
+
+
+狀態 163
+
+   76 Lit: '&' ID $@11 • '[' Lit DOTDOT $@12 Lit ']'
+
+    '['  偏移，並進入狀態 204
+
+
+狀態 164
+
+   72 Lit: Lit • ',' Lit
+   72    | Lit ',' Lit •
+
+    ','  偏移，並進入狀態 100
+
+    ','       [使用規則 72 以縮減 (Lit)]
+    $default  使用規則 72 以縮減 (Lit)
+
+
+狀態 165
+
+   29 Callfunc: ID '(' ')' ';' •
+
+    $default  使用規則 29 以縮減 (Callfunc)
+
+
+狀態 166
+
+   30 Callfunc: ID '(' argument_expr_list ')' •
+
+    $default  使用規則 30 以縮減 (Callfunc)
+
+
+狀態 167
+
+   31 argument_expr_list: argument_expr_list ',' • ID
+
+    ID  偏移，並進入狀態 205
+
+
+狀態 168
+
+   28 ReturnStmt: ID '%' ID EQL • $@3 Lit
+
+    $default  使用規則 27 以縮減 ($@3)
+
+    $@3  進入狀態 206
+
+
+狀態 169
+
+   50 Block: '{' $@5 GlobalStatementList '}' •
+
+    $default  使用規則 50 以縮減 (Block)
+
+
+狀態 170
+
+   22 Func: Funcname '(' ')' Block •
+
+    $default  使用規則 22 以縮減 (Func)
+
+
+狀態 171
+
+   24 Parameter: ID • ':' TypeName
+
+    ':'  偏移，並進入狀態 207
+
+
+狀態 172
+
+   21 Func: Funcname '(' $@2 Parameter • ')' ARROW TypeName '{' GlobalStatementList '}'
+   25 Parameter: Parameter • ',' ID ':' TypeName
+
+    ')'  偏移，並進入狀態 208
+    ','  偏移，並進入狀態 209
+
+
+狀態 173
+
+  133 TypeName: '&' •
+  134         | '&' • STR
+
+    STR  偏移，並進入狀態 177
+
+    $default  使用規則 133 以縮減 (TypeName)
+
+
+狀態 174
+
+   34 DecStmt: LET MUT ID ':' TypeName • '=' Lit ';'
+   36        | LET MUT ID ':' TypeName • ';'
+
+    ';'  偏移，並進入狀態 210
+    '='  偏移，並進入狀態 211
+
+
+狀態 175
+
+   35 DecStmt: LET MUT ID '=' Lit • ';'
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+    ';'  偏移，並進入狀態 212
+
+
+狀態 176
+
+   40 DecStmt: LET ID ':' '[' TypeName • ';' INT_LIT $@4 ']' '=' '[' Lit ']' ';'
+
+    ';'  偏移，並進入狀態 213
+
+
+狀態 177
+
+  134 TypeName: '&' STR •
+
+    $default  使用規則 134 以縮減 (TypeName)
+
+
+狀態 178
+
+   37 DecStmt: LET ID ':' Lit ';' •
+
+    $default  使用規則 37 以縮減 (DecStmt)
+
+
+狀態 179
+
+   33 DecStmt: LET ID ':' TypeName '=' • Lit ';'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 214
+    LoopStmt  進入狀態 52
+
+
+狀態 180
+
+   38 DecStmt: LET ID '=' Lit ';' •
+
+    $default  使用規則 38 以縮減 (DecStmt)
+
+
+狀態 181
+
+   55 Condition: ID $@6 '>' Lit •
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+
+    $default  使用規則 55 以縮減 (Condition)
+
+
+狀態 182
+
+   57 Condition: ID $@7 NEQ Lit •
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+
+    $default  使用規則 57 以縮減 (Condition)
+
+
+狀態 183
+
+   59 Condition: ID $@8 EQL Lit •
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+
+    $default  使用規則 59 以縮減 (Condition)
+
+
+狀態 184
+
+   61 Condition: ID $@9 '<' Lit •
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+
+    $default  使用規則 61 以縮減 (Condition)
+
+
+狀態 185
+
+   52 IfStmt: IF Condition Block new_non ELSE • Block
+
+    '{'  偏移，並進入狀態 15
+
+    Block  進入狀態 215
+
+
+狀態 186
+
+   65 ForStmt: FOR ID IN ID '{' • $@10 GlobalStatementList '}'
+
+    $default  使用規則 64 以縮減 ($@10)
+
+    $@10  進入狀態 216
+
+
+狀態 187
+
+   81 PrintStmt: PRINT '(' new_non Expression new_non • ')' ';'
+
+    ')'  偏移，並進入狀態 217
+
+
+狀態 188
+
+   94 AsStmt: ID AS TypeName •
+
+    $default  使用規則 94 以縮減 (AsStmt)
+
+
+狀態 189
+
+  130 ExpressionExpr: ID LSHIFT ID •
+
+    $default  使用規則 130 以縮減 (ExpressionExpr)
+
+
+狀態 190
+
+  129 ExpressionExpr: ID '%' ID •
+
+    $default  使用規則 129 以縮減 (ExpressionExpr)
+
+
+狀態 191
+
+  126 ExpressionExpr: ID '-' ID •
+
+    $default  使用規則 126 以縮減 (ExpressionExpr)
+
+
+狀態 192
+
+  128 ExpressionExpr: ID '/' ID •
+
+    $default  使用規則 128 以縮減 (ExpressionExpr)
+
+
+狀態 193
+
+  127 ExpressionExpr: ID '*' ID •
+
+    $default  使用規則 127 以縮減 (ExpressionExpr)
+
+
+狀態 194
+
+   92 Expression: ID $@13 '[' • Lit ']'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 218
+    LoopStmt  進入狀態 52
+
+
+狀態 195
+
+   96 AsStmt: '(' Exp ')' •
+
+    $default  使用規則 96 以縮減 (AsStmt)
+
+
+狀態 196
+
+   95 AsStmt: Lit AS TypeName •
+
+    $default  使用規則 95 以縮減 (AsStmt)
+
+
+狀態 197
+
+   80 PrintLNStmt: PRINTLN '(' Expression ')' ';' •
+
+    $default  使用規則 80 以縮減 (PrintLNStmt)
+
+
+狀態 198
+
+  125 ExpressionExpr: AsStmt '+' AsStmt •
+
+    $default  使用規則 125 以縮減 (ExpressionExpr)
+
+
+狀態 199
+
+   99 Exp: Exp LOR Exp1 •
+  101 Exp1: Exp1 • LAND Exp2
+
+    LAND  偏移，並進入狀態 146
+
+    $default  使用規則 99 以縮減 (Exp)
+
+
+狀態 200
+
+  101 Exp1: Exp1 LAND Exp2 •
+  103 Exp2: Exp2 • com_op Exp3
+
+    GEQ  偏移，並進入狀態 147
+    LEQ  偏移，並進入狀態 148
+    EQL  偏移，並進入狀態 149
+    NEQ  偏移，並進入狀態 150
+    '>'  偏移，並進入狀態 151
+    '<'  偏移，並進入狀態 152
+
+    $default  使用規則 101 以縮減 (Exp1)
+
+    com_op  進入狀態 153
+
+
+狀態 201
+
+  103 Exp2: Exp2 com_op Exp3 •
+  105 Exp3: Exp3 • add_op Exp4
+
+    '-'  偏移，並進入狀態 154
+    '+'  偏移，並進入狀態 155
+
+    $default  使用規則 103 以縮減 (Exp2)
+
+    add_op  進入狀態 156
+
+
+狀態 202
+
+  105 Exp3: Exp3 add_op Exp4 •
+  107 Exp4: Exp4 • mul_op AsStmt
+
+    '%'  偏移，並進入狀態 157
+    '/'  偏移，並進入狀態 158
+    '*'  偏移，並進入狀態 159
+
+    $default  使用規則 105 以縮減 (Exp3)
+
+    mul_op  進入狀態 160
+
+
+狀態 203
+
+  107 Exp4: Exp4 mul_op AsStmt •
+
+    $default  使用規則 107 以縮減 (Exp4)
+
+
+狀態 204
+
+   76 Lit: '&' ID $@11 '[' • Lit DOTDOT $@12 Lit ']'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 219
+    LoopStmt  進入狀態 52
+
+
+狀態 205
+
+   31 argument_expr_list: argument_expr_list ',' ID •
+
+    $default  使用規則 31 以縮減 (argument_expr_list)
+
+
+狀態 206
+
+   28 ReturnStmt: ID '%' ID EQL $@3 • Lit
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 220
+    LoopStmt  進入狀態 52
+
+
+狀態 207
+
+   24 Parameter: ID ':' • TypeName
+
+    INT    偏移，並進入狀態 113
+    FLOAT  偏移，並進入狀態 114
+    BOOL   偏移，並進入狀態 115
+    '&'    偏移，並進入狀態 173
+
+    TypeName  進入狀態 221
+
+
+狀態 208
+
+   21 Func: Funcname '(' $@2 Parameter ')' • ARROW TypeName '{' GlobalStatementList '}'
+
+    ARROW  偏移，並進入狀態 222
+
+
+狀態 209
+
+   25 Parameter: Parameter ',' • ID ':' TypeName
+
+    ID  偏移，並進入狀態 223
+
+
+狀態 210
+
+   36 DecStmt: LET MUT ID ':' TypeName ';' •
+
+    $default  使用規則 36 以縮減 (DecStmt)
+
+
+狀態 211
+
+   34 DecStmt: LET MUT ID ':' TypeName '=' • Lit ';'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 224
+    LoopStmt  進入狀態 52
+
+
+狀態 212
+
+   35 DecStmt: LET MUT ID '=' Lit ';' •
+
+    $default  使用規則 35 以縮減 (DecStmt)
+
+
+狀態 213
+
+   40 DecStmt: LET ID ':' '[' TypeName ';' • INT_LIT $@4 ']' '=' '[' Lit ']' ';'
+
+    INT_LIT  偏移，並進入狀態 225
+
+
+狀態 214
+
+   33 DecStmt: LET ID ':' TypeName '=' Lit • ';'
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+    ';'  偏移，並進入狀態 226
+
+
+狀態 215
+
+   52 IfStmt: IF Condition Block new_non ELSE Block •
+
+    $default  使用規則 52 以縮減 (IfStmt)
+
+
+狀態 216
+
+   65 ForStmt: FOR ID IN ID '{' $@10 • GlobalStatementList '}'
+
+    LET      偏移，並進入狀態 4
+    NEWLINE  偏移，並進入狀態 5
+    IF       偏移，並進入狀態 6
+    FOR      偏移，並進入狀態 7
+    WHILE    偏移，並進入狀態 8
+    PRINT    偏移，並進入狀態 9
+    PRINTLN  偏移，並進入狀態 10
+    FUNC     偏移，並進入狀態 11
+    RETURN   偏移，並進入狀態 12
+    BREAK    偏移，並進入狀態 13
+    ID       偏移，並進入狀態 14
+    '{'      偏移，並進入狀態 15
+
+    GlobalStatementList  進入狀態 227
+    GlobalStatement      進入狀態 17
+    PackageStmt          進入狀態 18
+    FunctionDeclStmt     進入狀態 19
+    Func                 進入狀態 20
+    Funcname             進入狀態 21
+    ReturnStmt           進入狀態 22
+    Callfunc             進入狀態 23
+    DecStmt              進入狀態 24
+    AssignStmt           進入狀態 25
+    AssignmetExpr        進入狀態 26
+    Block                進入狀態 27
+    IfStmt               進入狀態 28
+    WhileStmt            進入狀態 29
+    ForStmt              進入狀態 30
+    BreakStmt            進入狀態 31
+    PrintLNStmt          進入狀態 32
+    PrintStmt            進入狀態 33
+
+
+狀態 217
+
+   81 PrintStmt: PRINT '(' new_non Expression new_non ')' • ';'
+
+    ';'  偏移，並進入狀態 228
+
+
+狀態 218
+
+   72 Lit: Lit • ',' Lit
+   92 Expression: ID $@13 '[' Lit • ']'
+
+    ','  偏移，並進入狀態 100
+    ']'  偏移，並進入狀態 229
+
+
+狀態 219
+
+   72 Lit: Lit • ',' Lit
+   76    | '&' ID $@11 '[' Lit • DOTDOT $@12 Lit ']'
+
+    DOTDOT  偏移，並進入狀態 230
+    ','     偏移，並進入狀態 100
+
+
+狀態 220
+
+   28 ReturnStmt: ID '%' ID EQL $@3 Lit •
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+
+    $default  使用規則 28 以縮減 (ReturnStmt)
+
+
+狀態 221
+
+   24 Parameter: ID ':' TypeName •
+
+    $default  使用規則 24 以縮減 (Parameter)
+
+
+狀態 222
+
+   21 Func: Funcname '(' $@2 Parameter ')' ARROW • TypeName '{' GlobalStatementList '}'
+
+    INT    偏移，並進入狀態 113
+    FLOAT  偏移，並進入狀態 114
+    BOOL   偏移，並進入狀態 115
+    '&'    偏移，並進入狀態 173
+
+    TypeName  進入狀態 231
+
+
+狀態 223
+
+   25 Parameter: Parameter ',' ID • ':' TypeName
+
+    ':'  偏移，並進入狀態 232
+
+
+狀態 224
+
+   34 DecStmt: LET MUT ID ':' TypeName '=' Lit • ';'
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+    ';'  偏移，並進入狀態 233
+
+
+狀態 225
+
+   40 DecStmt: LET ID ':' '[' TypeName ';' INT_LIT • $@4 ']' '=' '[' Lit ']' ';'
+
+    $default  使用規則 39 以縮減 ($@4)
+
+    $@4  進入狀態 234
+
+
+狀態 226
+
+   33 DecStmt: LET ID ':' TypeName '=' Lit ';' •
+
+    $default  使用規則 33 以縮減 (DecStmt)
+
+
+狀態 227
+
+    3 GlobalStatementList: GlobalStatementList • GlobalStatement
+   65 ForStmt: FOR ID IN ID '{' $@10 GlobalStatementList • '}'
+
+    LET      偏移，並進入狀態 4
+    NEWLINE  偏移，並進入狀態 5
+    IF       偏移，並進入狀態 6
+    FOR      偏移，並進入狀態 7
+    WHILE    偏移，並進入狀態 8
+    PRINT    偏移，並進入狀態 9
+    PRINTLN  偏移，並進入狀態 10
+    FUNC     偏移，並進入狀態 11
+    RETURN   偏移，並進入狀態 12
+    BREAK    偏移，並進入狀態 13
+    ID       偏移，並進入狀態 14
+    '{'      偏移，並進入狀態 15
+    '}'      偏移，並進入狀態 235
+
+    GlobalStatement   進入狀態 64
+    PackageStmt       進入狀態 18
+    FunctionDeclStmt  進入狀態 19
+    Func              進入狀態 20
+    Funcname          進入狀態 21
+    ReturnStmt        進入狀態 22
+    Callfunc          進入狀態 23
+    DecStmt           進入狀態 24
+    AssignStmt        進入狀態 25
+    AssignmetExpr     進入狀態 26
+    Block             進入狀態 27
+    IfStmt            進入狀態 28
+    WhileStmt         進入狀態 29
+    ForStmt           進入狀態 30
+    BreakStmt         進入狀態 31
+    PrintLNStmt       進入狀態 32
+    PrintStmt         進入狀態 33
+
+
+狀態 228
+
+   81 PrintStmt: PRINT '(' new_non Expression new_non ')' ';' •
+
+    $default  使用規則 81 以縮減 (PrintStmt)
+
+
+狀態 229
+
+   92 Expression: ID $@13 '[' Lit ']' •
+
+    $default  使用規則 92 以縮減 (Expression)
+
+
+狀態 230
+
+   76 Lit: '&' ID $@11 '[' Lit DOTDOT • $@12 Lit ']'
+
+    $default  使用規則 75 以縮減 ($@12)
+
+    $@12  進入狀態 236
+
+
+狀態 231
+
+   21 Func: Funcname '(' $@2 Parameter ')' ARROW TypeName • '{' GlobalStatementList '}'
+
+    '{'  偏移，並進入狀態 237
+
+
+狀態 232
+
+   25 Parameter: Parameter ',' ID ':' • TypeName
+
+    INT    偏移，並進入狀態 113
+    FLOAT  偏移，並進入狀態 114
+    BOOL   偏移，並進入狀態 115
+    '&'    偏移，並進入狀態 173
+
+    TypeName  進入狀態 238
+
+
+狀態 233
+
+   34 DecStmt: LET MUT ID ':' TypeName '=' Lit ';' •
+
+    $default  使用規則 34 以縮減 (DecStmt)
+
+
+狀態 234
+
+   40 DecStmt: LET ID ':' '[' TypeName ';' INT_LIT $@4 • ']' '=' '[' Lit ']' ';'
+
+    ']'  偏移，並進入狀態 239
+
+
+狀態 235
+
+   65 ForStmt: FOR ID IN ID '{' $@10 GlobalStatementList '}' •
+
+    $default  使用規則 65 以縮減 (ForStmt)
+
+
+狀態 236
+
+   76 Lit: '&' ID $@11 '[' Lit DOTDOT $@12 • Lit ']'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 240
+    LoopStmt  進入狀態 52
+
+
+狀態 237
+
+   21 Func: Funcname '(' $@2 Parameter ')' ARROW TypeName '{' • GlobalStatementList '}'
+
+    LET      偏移，並進入狀態 4
+    NEWLINE  偏移，並進入狀態 5
+    IF       偏移，並進入狀態 6
+    FOR      偏移，並進入狀態 7
+    WHILE    偏移，並進入狀態 8
+    PRINT    偏移，並進入狀態 9
+    PRINTLN  偏移，並進入狀態 10
+    FUNC     偏移，並進入狀態 11
+    RETURN   偏移，並進入狀態 12
+    BREAK    偏移，並進入狀態 13
+    ID       偏移，並進入狀態 14
+    '{'      偏移，並進入狀態 15
+
+    GlobalStatementList  進入狀態 241
+    GlobalStatement      進入狀態 17
+    PackageStmt          進入狀態 18
+    FunctionDeclStmt     進入狀態 19
+    Func                 進入狀態 20
+    Funcname             進入狀態 21
+    ReturnStmt           進入狀態 22
+    Callfunc             進入狀態 23
+    DecStmt              進入狀態 24
+    AssignStmt           進入狀態 25
+    AssignmetExpr        進入狀態 26
+    Block                進入狀態 27
+    IfStmt               進入狀態 28
+    WhileStmt            進入狀態 29
+    ForStmt              進入狀態 30
+    BreakStmt            進入狀態 31
+    PrintLNStmt          進入狀態 32
+    PrintStmt            進入狀態 33
+
+
+狀態 238
+
+   25 Parameter: Parameter ',' ID ':' TypeName •
+
+    $default  使用規則 25 以縮減 (Parameter)
+
+
+狀態 239
+
+   40 DecStmt: LET ID ':' '[' TypeName ';' INT_LIT $@4 ']' • '=' '[' Lit ']' ';'
+
+    '='  偏移，並進入狀態 242
+
+
+狀態 240
+
+   72 Lit: Lit • ',' Lit
+   76    | '&' ID $@11 '[' Lit DOTDOT $@12 Lit • ']'
+
+    ','  偏移，並進入狀態 100
+    ']'  偏移，並進入狀態 243
+
+
+狀態 241
+
+    3 GlobalStatementList: GlobalStatementList • GlobalStatement
+   21 Func: Funcname '(' $@2 Parameter ')' ARROW TypeName '{' GlobalStatementList • '}'
+
+    LET      偏移，並進入狀態 4
+    NEWLINE  偏移，並進入狀態 5
+    IF       偏移，並進入狀態 6
+    FOR      偏移，並進入狀態 7
+    WHILE    偏移，並進入狀態 8
+    PRINT    偏移，並進入狀態 9
+    PRINTLN  偏移，並進入狀態 10
+    FUNC     偏移，並進入狀態 11
+    RETURN   偏移，並進入狀態 12
+    BREAK    偏移，並進入狀態 13
+    ID       偏移，並進入狀態 14
+    '{'      偏移，並進入狀態 15
+    '}'      偏移，並進入狀態 244
+
+    GlobalStatement   進入狀態 64
+    PackageStmt       進入狀態 18
+    FunctionDeclStmt  進入狀態 19
+    Func              進入狀態 20
+    Funcname          進入狀態 21
+    ReturnStmt        進入狀態 22
+    Callfunc          進入狀態 23
+    DecStmt           進入狀態 24
+    AssignStmt        進入狀態 25
+    AssignmetExpr     進入狀態 26
+    Block             進入狀態 27
+    IfStmt            進入狀態 28
+    WhileStmt         進入狀態 29
+    ForStmt           進入狀態 30
+    BreakStmt         進入狀態 31
+    PrintLNStmt       進入狀態 32
+    PrintStmt         進入狀態 33
+
+
+狀態 242
+
+   40 DecStmt: LET ID ':' '[' TypeName ';' INT_LIT $@4 ']' '=' • '[' Lit ']' ';'
+
+    '['  偏移，並進入狀態 245
+
+
+狀態 243
+
+   76 Lit: '&' ID $@11 '[' Lit DOTDOT $@12 Lit ']' •
+
+    $default  使用規則 76 以縮減 (Lit)
+
+
+狀態 244
+
+   21 Func: Funcname '(' $@2 Parameter ')' ARROW TypeName '{' GlobalStatementList '}' •
+
+    $default  使用規則 21 以縮減 (Func)
+
+
+狀態 245
+
+   40 DecStmt: LET ID ':' '[' TypeName ';' INT_LIT $@4 ']' '=' '[' • Lit ']' ';'
+
+    TRUE       偏移，並進入狀態 44
+    FALSE      偏移，並進入狀態 45
+    LOOP       偏移，並進入狀態 46
+    INT_LIT    偏移，並進入狀態 47
+    FLOAT_LIT  偏移，並進入狀態 48
+    '"'        偏移，並進入狀態 49
+    '&'        偏移，並進入狀態 50
+
+    $default  使用規則 77 以縮減 (Lit)
+
+    Lit       進入狀態 246
+    LoopStmt  進入狀態 52
+
+
+狀態 246
+
+   40 DecStmt: LET ID ':' '[' TypeName ';' INT_LIT $@4 ']' '=' '[' Lit • ']' ';'
+   72 Lit: Lit • ',' Lit
+
+    ','  偏移，並進入狀態 100
+    ']'  偏移，並進入狀態 247
+
+
+狀態 247
+
+   40 DecStmt: LET ID ':' '[' TypeName ';' INT_LIT $@4 ']' '=' '[' Lit ']' • ';'
+
+    ';'  偏移，並進入狀態 248
+
+
+狀態 248
+
+   40 DecStmt: LET ID ':' '[' TypeName ';' INT_LIT $@4 ']' '=' '[' Lit ']' ';' •
+
+    $default  使用規則 40 以縮減 (DecStmt)
